@@ -10,7 +10,7 @@ type PacketType uint32
 
 const (
 	InitCommandRequestPacket PacketType = 0x00000001
-	InitCommandAck           PacketType = 0x00000002
+	InitCommandAckPacket     PacketType = 0x00000002
 
 	InitEventRequestPacket PacketType = 0x00000003
 	InitEventAckPacket     PacketType = 0x00000004

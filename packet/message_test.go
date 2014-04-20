@@ -85,7 +85,7 @@ func testInitCommandAck(t testing.TB, N int) {
 		friendlyName := make([]byte, len(str))
 		copy(friendlyName[:], str)
 
-		test_packet = pack(t, packet.InitCommandAck, sessionID, guid, friendlyName)
+		test_packet = pack(t, packet.InitCommandAckPacket, sessionID, guid, friendlyName)
 	}
 
 	for i := 0; i < N; i++ {
@@ -110,11 +110,8 @@ func testInitCommandAck(t testing.TB, N int) {
 
 func TestInitEventRequest(t *testing.T) {
 	// Setup
-	var expect_packetLayout []byte
 	sessionID := uint32(1234)
-	{
-		expect_packetLayout = pack(t, packet.InitEventRequestPacket, sessionID)
-	}
+	expect_packetLayout := pack(t, packet.InitEventRequestPacket, sessionID)
 
 	// Test
 	buf := new(bytes.Buffer)

@@ -25,7 +25,7 @@ func RecvInitCommand(r io.Reader) (sessionID uint32, guid, friendlyName string, 
 	}
 
 	switch base.Typ {
-	case InitCommandAck:
+	case InitCommandAckPacket:
 		if base.Len < 21 {
 			err = fmt.Errorf("Invalid packet size: %d", base.Len)
 			return
