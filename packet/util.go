@@ -1,6 +1,9 @@
 package packet
 
-import "encoding/binary"
+import (
+	"bytes"
+	"encoding/binary"
+)
 
 var endian = binary.LittleEndian
 
@@ -35,4 +38,31 @@ func PutUint64(b []byte, v uint64) {
 func PutString(b []byte, v string) (n int) {
 	n = copy(b[:], v)
 	return
+}
+
+func Pack(args ...interface{}) (b []byte, err error) {
+	buf := new(bytes.Buffer)
+	for _, v := range args {
+		if err := binary.Write(buf, endian, v); err != nil {
+			return nil, err
+		}
+	}
+	return buf.Bytes(), nil
+}
+
+func Unpack(b []byte, args ...interface{}) (err error) {
+	buf := bytes.NewReader(b)
+	for _, v := range args {
+		if err := binary.Read(buf, endian, &v); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func Length(args ...interface{}) (n int) {
+	for _, v := range args {
+		n += binary.Size(v)
+	}
+	return n
 }

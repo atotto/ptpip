@@ -70,8 +70,10 @@ func Recv(r io.Reader) (base BaseLayout, payload []byte, err error) {
 	if err = binary.Read(r, binary.LittleEndian, &base); err != nil {
 		return
 	}
-	payload = make([]byte, base.Len)
-	_, err = io.ReadFull(r, payload)
+	if base.Len != 0 {
+		payload = make([]byte, base.Len)
+		_, err = io.ReadFull(r, payload)
+	}
 
 	return
 }

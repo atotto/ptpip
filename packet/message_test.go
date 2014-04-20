@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/atotto/ptpip/packet"
+	"github.com/atotto/ptpip/ptp"
 )
 
 func pack(t testing.TB, typ packet.PacketType, args ...interface{}) (b []byte) {
@@ -136,5 +137,58 @@ func TestInitEventAck(t *testing.T) {
 	// Verify
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestOperationRequest(t *testing.T) {
+	// Setup
+	dataPheseInfo := uint32(123)
+	operationCode := ptp.OC_InitiateCapture
+	transactionID := uint32(1)
+	parameters := []uint32{1, 2, 3}
+
+	expect_packetLayout := pack(t, packet.OperationRequestPacket, dataPheseInfo, operationCode, transactionID, parameters)
+
+	// Test
+	buf := new(bytes.Buffer)
+	err := packet.SendOperationRequest(buf, dataPheseInfo, operationCode, transactionID, parameters)
+
+	// Verify
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !bytes.Equal(expect_packetLayout, buf.Bytes()) {
+		t.Errorf("packet fail")
+	}
+}
+
+func TestOperationResponse(t *testing.T) {
+	// Setup
+	expect_responseCode := uint16(123)
+	expect_transactionID := uint32(1)
+	expect_parameters := []uint32{1, 2, 3}
+
+	test_packet := pack(t, packet.OperationResponsePacket, expect_responseCode, expect_transactionID, expect_parameters)
+
+	// Test
+	responseCode, transactionID, parameters, err := packet.RecvOperationResponse(bytes.NewReader(test_packet))
+
+	// Verify
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if responseCode != expect_responseCode {
+		t.Errorf("want responseCode %d, got %d", expect_responseCode, responseCode)
+	}
+	if transactionID != expect_transactionID {
+		t.Errorf("want transactionID %d, got %d", expect_transactionID, transactionID)
+	}
+	if len(parameters) != len(expect_parameters) {
+		t.Errorf("want parameters %+v, got %+v", expect_parameters, parameters)
+	}
+	for n, v := range parameters {
+		if v != expect_parameters[n] {
+			t.Fatalf("want parameters %+v, got %+v", expect_parameters, parameters)
+		}
 	}
 }

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+
+	"github.com/atotto/ptpip/ptp"
 )
 
 func SendInitCommand(w io.Writer, guid, friendlyName string) (err error) {
@@ -68,6 +70,42 @@ func RecvInitEvent(r io.Reader) (err error) {
 	}
 }
 
-type Operation struct {
-	BaseLayout
+func SendOperationRequest(w io.Writer, dataPheseInfo uint32, operationCode ptp.OperationCode, transactionID uint32, parameters []uint32) (err error) {
+	b, err := Pack(dataPheseInfo, operationCode, transactionID, parameters)
+	if err != nil {
+		return
+	}
+	return Send(w, OperationRequestPacket, b)
+}
+
+func RecvOperationResponse(r io.Reader) (responseCode uint16, transactionID uint32, parameters []uint32, err error) {
+	base, payload, err := Recv(r)
+	if err != nil {
+		return
+	}
+	switch base.Typ {
+	case OperationResponsePacket:
+		responseCode = Uint16(payload[0:2])
+		transactionID = Uint32(payload[2:6])
+		parameters = make([]uint32, (base.Len-6)/4)
+		for i := 0; i < len(parameters); i++ {
+			parameters[i] = Uint32(payload[6+i*4 : 6+(i+1)*4])
+		}
+		return
+	default:
+		err = errors.New("Invalid State.")
+		return
+	}
+}
+
+func RecvStartData(r io.Reader) (err error) {
+	panic("NotImplementedYet")
+}
+
+func RecvData(r io.Reader) (err error) {
+	panic("NotImplementedYet")
+}
+
+func RecvEndData(r io.Reader) (err error) {
+	panic("NotImplementedYet")
 }
