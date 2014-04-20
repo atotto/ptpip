@@ -2,6 +2,7 @@ package packet
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
 )
 
@@ -48,6 +49,21 @@ func NewBaseLayout(typ PacketType, length int) *BaseLayout {
 	p.Typ = typ
 	p.Len = uint32(length)
 	return &p
+}
+
+func Send(w io.Writer, typ PacketType, payload []byte) (err error) {
+	base := NewBaseLayout(typ, len(payload))
+	if err = binary.Write(w, binary.LittleEndian, base); err != nil {
+		return
+	}
+	var n int
+	if n, err = w.Write(payload); err != nil {
+		return
+	}
+	if n != len(payload) {
+		return fmt.Errorf("write byte size mismatch: %d != %d", len(payload), n)
+	}
+	return
 }
 
 func Recv(r io.Reader) (base BaseLayout, payload []byte, err error) {

@@ -1,32 +1,24 @@
 package packet
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
-	"unsafe"
 )
 
-type InitCommand struct {
-	BaseLayout
-	GUID         [16]byte
-	FriendlyName [20]byte
-}
-
-func NewInitCommand(guid, friendlyName string) *InitCommand {
-	var p InitCommand
+func SendInitCommand(w io.Writer, guid, friendlyName string) (err error) {
+	p := struct {
+		GUID         [16]byte
+		FriendlyName []byte
+	}{}
 	copy(p.GUID[:], guid)
-	copy(p.FriendlyName[:], friendlyName)
-	p.BaseLayout = *NewBaseLayout(InitCommandRequestPacket, int(unsafe.Sizeof(p)-8))
-	return &p
+	p.FriendlyName = []byte(friendlyName)
+
+	b := append(p.GUID[:], p.FriendlyName[:]...)
+	return Send(w, InitCommandRequestPacket, b)
 }
 
-func (p *InitCommand) Send(w io.Writer) (err error) {
-	return binary.Write(w, binary.LittleEndian, BaseLayout{0, InitCommandRequestPacket})
-}
-
-func (p *InitCommand) Recv(r io.Reader) (sessionID uint32, guid, friendlyName string, err error) {
+func RecvInitCommand(r io.Reader) (sessionID uint32, guid, friendlyName string, err error) {
 	base, payload, err := Recv(r)
 	if err != nil {
 		return
@@ -53,12 +45,10 @@ func (p *InitCommand) Recv(r io.Reader) (sessionID uint32, guid, friendlyName st
 	return
 }
 
-type InitEvent struct {
-	SessionID uint32
-}
-
-func (p *InitEvent) Send(w io.Writer) (err error) {
-	return binary.Write(w, binary.LittleEndian, BaseLayout{0, InitEventRequestPacket})
+func SendInitEvent(w io.Writer, sessionID uint32) (err error) {
+	b := make([]byte, 4)
+	PutUint32(b, sessionID)
+	return Send(w, InitEventRequestPacket, b)
 }
 
 type Operation struct {
