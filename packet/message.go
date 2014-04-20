@@ -10,13 +10,15 @@ import (
 
 func SendInitCommand(w io.Writer, guid, friendlyName string) (err error) {
 	p := struct {
-		GUID         [16]byte
+		GUID         []byte
 		FriendlyName []byte
 	}{}
-	copy(p.GUID[:], guid)
-	p.FriendlyName = []byte(friendlyName)
+	p.GUID = []byte(guid)
+	p.FriendlyName = ToWChar(friendlyName)
+	n := []byte{0, 0}
 
-	b := append(p.GUID[:], p.FriendlyName[:]...)
+	b := append(p.GUID[0:16], p.FriendlyName[:]...)
+	b = append(b, n...)
 	return Send(w, InitCommandRequestPacket, b)
 }
 
@@ -34,7 +36,7 @@ func RecvInitCommand(r io.Reader) (sessionID uint32, guid, friendlyName string, 
 		}
 		sessionID = Uint32(payload[0:4])
 		guid = String(payload[4:20])
-		friendlyName = String(payload[20:base.Len])
+		friendlyName = FromWChar(payload[20 : base.Len-8])
 		return
 	case InitFailPacket:
 		reason := Uint32(payload[0:4])
@@ -87,7 +89,7 @@ func RecvOperationResponse(r io.Reader) (responseCode uint16, transactionID uint
 	case OperationResponsePacket:
 		responseCode = Uint16(payload[0:2])
 		transactionID = Uint32(payload[2:6])
-		parameters = make([]uint32, (base.Len-6)/4)
+		parameters = make([]uint32, (base.Len-8-6)/4)
 		for i := 0; i < len(parameters); i++ {
 			parameters[i] = Uint32(payload[6+i*4 : 6+(i+1)*4])
 		}

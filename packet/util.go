@@ -66,3 +66,25 @@ func Length(args ...interface{}) (n int) {
 	}
 	return n
 }
+
+func ToWChar(str string) []byte {
+	buf := []byte(str)
+	wc := make([]byte, len(buf)*2)
+	for i, c := range buf {
+		wc[i*2] = c
+		wc[i*2+1] = 0
+	}
+	return wc
+}
+
+func FromWChar(wc []byte) string {
+	b := make([]byte, len(wc)/2)
+	var i int
+	for i = 0; i < len(b); i++ {
+		if wc[i*2] == 0 {
+			break
+		}
+		b[i] = wc[i*2]
+	}
+	return string(b[0:i])
+}

@@ -52,7 +52,7 @@ func NewBaseLayout(typ PacketType, length int) *BaseLayout {
 }
 
 func Send(w io.Writer, typ PacketType, payload []byte) (err error) {
-	base := NewBaseLayout(typ, len(payload))
+	base := NewBaseLayout(typ, len(payload)+8)
 	if err = binary.Write(w, binary.LittleEndian, base); err != nil {
 		return
 	}
@@ -71,9 +71,8 @@ func Recv(r io.Reader) (base BaseLayout, payload []byte, err error) {
 		return
 	}
 	if base.Len != 0 {
-		payload = make([]byte, base.Len)
+		payload = make([]byte, base.Len-8)
 		_, err = io.ReadFull(r, payload)
 	}
-
 	return
 }

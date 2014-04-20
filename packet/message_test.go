@@ -12,7 +12,7 @@ import (
 
 func pack(t testing.TB, typ packet.PacketType, args ...interface{}) (b []byte) {
 	buf := new(bytes.Buffer)
-	n := 0
+	n := 8
 	for _, v := range args {
 		n += binary.Size(v)
 	}
@@ -45,8 +45,9 @@ func testInitCommandRequest(t testing.TB, N int) {
 	{
 		guid := make([]byte, 16)
 		copy(guid[:], "1234567890123456")
-		friendlyName := []byte("golang_ptpip_client")
-		expect_packetLayout = pack(t, packet.InitCommandRequestPacket, guid, friendlyName)
+		friendlyName := packet.ToWChar("golang_ptpip_client")
+		n := []byte{0, 0}
+		expect_packetLayout = pack(t, packet.InitCommandRequestPacket, guid, friendlyName, n)
 	}
 
 	for i := 0; i < N; i++ {
@@ -82,11 +83,10 @@ func testInitCommandAck(t testing.TB, N int) {
 		sessionID := expect_sessionID
 		guid := make([]byte, 16)
 		copy(guid[:], expect_guid)
-		str := expect_friendlyName
-		friendlyName := make([]byte, len(str))
-		copy(friendlyName[:], str)
+		friendlyName := packet.ToWChar(expect_friendlyName)
+		n := []byte{0, 0}
 
-		test_packet = pack(t, packet.InitCommandAckPacket, sessionID, guid, friendlyName)
+		test_packet = pack(t, packet.InitCommandAckPacket, sessionID, guid, friendlyName, n)
 	}
 
 	for i := 0; i < N; i++ {
