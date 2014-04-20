@@ -128,3 +128,16 @@ func TestInitEventRequest(t *testing.T) {
 		t.Errorf("packet fail")
 	}
 }
+
+func TestInitEventAck(t *testing.T) {
+	// Setup
+	test_packet := pack(t, packet.InitEventAckPacket)
+
+	// Test
+	err := packet.RecvInitEvent(bytes.NewReader(test_packet))
+
+	// Verify
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
