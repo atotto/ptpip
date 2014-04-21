@@ -80,14 +80,14 @@ func SendOperationRequest(w io.Writer, dataPheseInfo uint32, operationCode ptp.O
 	return Send(w, OperationRequestPacket, b)
 }
 
-func RecvOperationResponse(r io.Reader) (responseCode uint16, transactionID uint32, parameters []uint32, err error) {
+func RecvOperationResponse(r io.Reader) (responseCode ptp.OperationResponseCode, transactionID uint32, parameters []uint32, err error) {
 	base, payload, err := Recv(r)
 	if err != nil {
 		return
 	}
 	switch base.Typ {
 	case OperationResponsePacket:
-		responseCode = Uint16(payload[0:2])
+		responseCode = ptp.OperationResponseCode(Uint16(payload[0:2]))
 		transactionID = Uint32(payload[2:6])
 		parameters = make([]uint32, (base.Len-8-6)/4)
 		for i := 0; i < len(parameters); i++ {

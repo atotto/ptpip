@@ -164,7 +164,7 @@ func TestOperationRequest(t *testing.T) {
 
 func TestOperationResponse(t *testing.T) {
 	// Setup
-	expect_responseCode := uint16(123)
+	expect_responseCode := ptp.RC_OK
 	expect_transactionID := uint32(1)
 	expect_parameters := []uint32{1, 2, 3}
 
