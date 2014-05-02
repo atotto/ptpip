@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/atotto/ptpip/packet"
+	"github.com/atotto/ptpip/packet/util"
 	"github.com/atotto/ptpip/ptp"
 )
 
@@ -45,7 +46,7 @@ func testInitCommandRequest(t testing.TB, N int) {
 	{
 		guid := make([]byte, 16)
 		copy(guid[:], "1234567890123456")
-		friendlyName := packet.ToWChar("golang_ptpip_client")
+		friendlyName := util.ToWChar("golang_ptpip_client")
 		n := []byte{0, 0}
 		expect_packetLayout = pack(t, packet.InitCommandRequestPacket, guid, friendlyName, n)
 	}
@@ -83,7 +84,7 @@ func testInitCommandAck(t testing.TB, N int) {
 		sessionID := expect_sessionID
 		guid := make([]byte, 16)
 		copy(guid[:], expect_guid)
-		friendlyName := packet.ToWChar(expect_friendlyName)
+		friendlyName := util.ToWChar(expect_friendlyName)
 		n := []byte{0, 0}
 
 		test_packet = pack(t, packet.InitCommandAckPacket, sessionID, guid, friendlyName, n)
