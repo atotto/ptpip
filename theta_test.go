@@ -1,3 +1,7 @@
+// +build theta
+
+// for RICOH THETA
+// You can run `go test -run Theta -tags theta`
 package ptpip_test
 
 import (
@@ -9,7 +13,6 @@ import (
 )
 
 func TestThetaShutter(t *testing.T) {
-	t.Skip("Need Theta")
 
 	name := "Golang_Theta_Shutter"
 	guid := "2adf2521-375c-406a-bc08-3c662406090e" // http://www.guidgenerator.com/online-guid-generator.aspx
